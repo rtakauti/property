@@ -1,0 +1,16 @@
+{
+  "name": "rtakauti/property",
+  "license": "",
+  "authors": [
+    {
+      "name": "Rubens S. Takauti",
+      "email": "rtakauti@hotmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Rtakauti\\": "app/",
+      "Test\\": "tests/"
+    }
+  }
+}
