@@ -11,42 +11,47 @@ use RuntimeException;
 class LineIterator implements Iterator
 {
     protected $handler;
-    protected $line;
-    protected $position;
+    protected string $line;
+    protected int $position;
+    private bool $validation;
 
     public function __construct($fileName)
     {
-        if (!$this->handler = fopen($fileName, 'r'))
-            throw new RuntimeException('Couldn\'t open file "' . $fileName . '"');
+        if (!$this->handler = fopen($fileName, 'rb')) {
+            throw new RuntimeException('Could not open file "' . $fileName . '"' . PHP_EOL);
+        }
+        $this->validation = true;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         fseek($this->handler, 0);
-        $this->line = fgets($this->handler);
         $this->position = 0;
+        $this->line = fgets($this->handler);
     }
 
-    public function valid()
+    public function valid(): bool
     {
-        return false !== $this->line;
+        return $this->validation;
     }
 
-    public function current()
+    public function current(): string
     {
         return $this->line;
     }
 
-    public function key()
+    public function key(): int
     {
         return $this->position;
     }
 
-    public function next()
+    public function next(): void
     {
-        if (false !== $this->line) {
-            $this->line = fgets($this->handler);
+        $this->validation = false;
+        if (is_string($line = fgets($this->handler))) {
+            $this->line = $line;
             $this->position++;
+            $this->validation = true;
         }
     }
 

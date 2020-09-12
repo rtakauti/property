@@ -1,3 +1,4 @@
 vendor/
 property.json
 .etag
+.idea/

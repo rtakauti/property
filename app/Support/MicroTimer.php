@@ -8,7 +8,7 @@ namespace Rtakauti\Support;
 class MicroTimer
 {
 
-    public final function timer(callable $microTest)
+    final public function timer(callable $microTest): void
     {
         $initialTime = microtime(true);
         $microTest();

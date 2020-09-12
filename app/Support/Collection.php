@@ -6,13 +6,14 @@ namespace Rtakauti\Support;
 
 use ArrayAccess;
 use Countable;
+use Exception;
 use Iterator;
 use JsonSerializable;
 
 class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
 {
-    protected $items;
-    protected $position;
+    protected array $items;
+    protected int $position;
 
     public function __construct(array $items = [])
     {
@@ -20,9 +21,9 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
         $this->items = $items;
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
-        if (is_integer($offset) || is_string($offset)) {
+        if (is_int($offset) || is_string($offset)) {
             return array_key_exists($offset, $this->items);
         }
 
@@ -34,7 +35,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
         return $this->items[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if (is_null($offset)) {
             $this->items[] = $value;
@@ -43,19 +44,23 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
         }
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->items[$offset]);
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->items);
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
-        return json_encode($this->items);
+        try {
+            return json_encode($this->items, JSON_THROW_ON_ERROR);
+        } catch (Exception $exception) {
+            return $exception->getMessage();
+        }
     }
 
     public function current()
@@ -63,22 +68,22 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
         return $this->items[$this->position];
     }
 
-    public function next()
+    public function next(): void
     {
         ++$this->position;
     }
 
-    public function key()
+    public function key():int
     {
         return $this->position;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->items[$this->position]);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }

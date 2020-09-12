@@ -12,5 +12,17 @@
       "Rtakauti\\": "app/",
       "Test\\": "tests/"
     }
+  },
+  "require": {
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "phpspec/phpspec": "*",
+    "codeception/codeception": "*",
+    "codeception/module-asserts": "*",
+    "codeception/module-phpbrowser": "*",
+    "codeception/verify": "*",
+    "codeception/specify": "*"
   }
 }
