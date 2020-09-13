@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 
 namespace Rtakauti;
@@ -8,36 +9,41 @@ ini_set('memory_limit', '12M');
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Exception;
-use Rtakauti\Support\MicroTimer;
+use Rtakauti\Support\Connection;
 use Rtakauti\Support\CreateJsonFile;
-use Rtakauti\Support\Collection;
 use Rtakauti\Support\LineIterator;
+use Rtakauti\Support\MicroTimer;
+use Rtakauti\Support\PropertyList;
 
 $microTimer = new MicroTimer();
 
 $microTest = static function () {
-    $service = new CreateJsonFile('property.json', 2);
-    $service->save();
+    $connection = new Connection(2);
+    $connection->setDomain('grupozap-code-challenge.s3-website-us-east-1.amazonaws.com');
+    $connection->setEndpoint('/sources/source-2.json');
+    $connection->setPort(80);
+    $service = new CreateJsonFile('property.json');
+    $service->setGenerator($connection->retrieveJson());
+    $service->create();
     $service = null;
 };
 
 $microTest1 = static function () {
-    $collection = new Collection();
+    $propertyList = new PropertyList();
     try {
         $lines = new LineIterator('property.json');
-    }catch (Exception $exception){
+        foreach ($lines as $line) {
+            $propertyList[] = trim($line, " \n\r,][");
+        }
+    } catch (Exception $exception) {
         die($exception->getMessage());
     }
-    foreach ($lines as $line) {
-        try {
-            $collection[] = $trimmed = trim($line," \n\r,][");
-        }catch (Exception $exception){
-            die($exception->getMessage());
-        }
-        echo $trimmed. PHP_EOL;
+    foreach ($propertyList as $item) {
+        echo $item->getCreatedAt()->format('d/m/Y') . PHP_EOL;
+        echo $item->jsonSerialize() . PHP_EOL;
     }
-    echo count($collection) . PHP_EOL;
-    $collection = null;
+    echo count($propertyList) . PHP_EOL;
+    $propertyList = null;
 };
 
 

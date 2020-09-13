@@ -6,11 +6,9 @@ namespace Rtakauti\Support;
 
 use ArrayAccess;
 use Countable;
-use Exception;
 use Iterator;
-use JsonSerializable;
 
-class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
+abstract class Collection implements ArrayAccess, Countable, Iterator
 {
     protected array $items;
     protected int $position;
@@ -52,15 +50,6 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, Iterator
     public function count(): int
     {
         return count($this->items);
-    }
-
-    public function jsonSerialize(): string
-    {
-        try {
-            return json_encode($this->items, JSON_THROW_ON_ERROR);
-        } catch (Exception $exception) {
-            return $exception->getMessage();
-        }
     }
 
     public function current()

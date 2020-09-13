@@ -16,29 +16,65 @@ class CreateJsonFile
     private int $block;
     private string $delimiter;
     private string $newDelimiter;
+    private Generator $generator;
 
-    public function __construct(string $fileName, int $block = 1)
+
+    public function __construct(string $fileName)
     {
         $this->fileName = $fileName;
-        $this->block = 1024 * $block;
         $this->etag = '';
         $this->delimiter = '}},{';
         $this->newDelimiter = "}},\n{";
-        if (file_exists('.etag')) {
-            $this->etag .= file_get_contents('.etag');
+    }
+
+    public function create(): void
+    {
+        try {
+            $this->analyseHeader($this->generator);
+            $this->createStaging($this->generator);
+            $this->createJsonFile();
+            unlink(__DIR__ . '/../assets/staging.json');
+        }catch (RuntimeException $runtimeException){
+            echo $runtimeException->getMessage();
+        } catch (Exception $exception) {
+            die($exception->getMessage());
         }
     }
 
-    public function save(): void
+    /**
+     * @param Generator $lines
+     * @return void
+     */
+    private function analyseHeader(Generator $lines): void
     {
-        $lines = $this->getJson();
-        try {
-            $this->analyseHeader($lines);
-            $this->createStaging($lines);
-            $this->createJsonFile();
-            unlink('staging.json');
-        }catch (Exception $exception){
-            die($exception->getMessage());
+        foreach ($lines as $line) {
+            if (preg_match('/(304)/', $line) && file_exists(__DIR__ . '/../assets/'.$this->fileName)) {
+                throw new RuntimeException('Not Modified');
+            }
+            if ("\r\n" === $line) {
+                return;
+            }
+            try {
+                $this->createEtagFile($line);
+            } catch (Exception $exception) {
+                die($exception->getMessage());
+            }
+        }
+        $lines->next();
+    }
+
+    /**
+     * @param $line
+     * @return void
+     */
+    private function createEtagFile($line): void
+    {
+        if (preg_match('/(ETag:)\s"(.*)"/', $line, $matches)) {
+            if (!$handler = fopen(__DIR__ . '/../assets/.etag', 'wb')) {
+                throw new RuntimeException('Could not open file ".etag"');
+            }
+            fwrite($handler, $matches[2]);
+            fclose($handler);
         }
     }
 
@@ -48,7 +84,7 @@ class CreateJsonFile
      */
     private function createStaging(Generator $lines): void
     {
-        if (!$handler = fopen('staging.json', 'wb')) {
+        if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'wb')) {
             throw new RuntimeException('Could not open file "staging.json"');
         }
         for (; $lines->valid(); $lines->next()) {
@@ -57,13 +93,12 @@ class CreateJsonFile
         fclose($handler);
     }
 
-
     private function createJsonFile(): void
     {
-        if (!$handler = fopen('staging.json', 'rb')) {
+        if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'rb')) {
             throw new RuntimeException('Could not open file "staging.json"');
         }
-        if (!$handler1 = fopen($this->fileName, 'wb')) {
+        if (!$handler1 = fopen(__DIR__ . '/../assets/' . $this->fileName, 'wb')) {
             throw new RuntimeException('Could not open file "' . $this->fileName . '"');
         }
         while (!feof($handler)) {
@@ -79,66 +114,15 @@ class CreateJsonFile
         fclose($handler);
     }
 
-    /**
-     * @return Generator
-     */
-    private function getJson(): Generator
-    {
-        $domain = 'grupozap-code-challenge.s3-website-us-east-1.amazonaws.com';
-        $endpoint = '/sources/source-2.json';
-        if (!$handler = fsockopen($domain, 80, $errno, $error, 30)) {
-            die("$error ($errno)\n");
-        }
-        $out = "GET $endpoint HTTP/1.1\r\n";
-        $out .= "Host: $domain\r\n";
-        $out .= "Accept: application/json; charset=utf-8\r\n";
-        $out .= "If-None-Match: \"$this->etag\"\r\n";
-        $out .= "Connection: keep-alive\r\n\r\n";
-        fwrite($handler, $out);
-        while (!feof($handler)) {
-            yield fgets($handler, $this->block);
-        }
-        fclose($handler);
-    }
-
 
     /**
-     * @param Generator $lines
-     * @return void
+     * @param Generator $generator
      */
-    private function analyseHeader(Generator $lines): void
+    public function setGenerator(Generator $generator): void
     {
-        foreach ($lines as $line) {
-            if (preg_match('/(304)/', $line) && file_exists($this->fileName)) {
-                die('Not Modified');
-            }
-            if ("\r\n" === $line) {
-                return;
-            }
-            try {
-                $this->createEtagFile($line);
-            }catch (Exception $exception){
-                echo $exception->getMessage();
-                return;
-            }
-        }
-        $lines->next();
+        $this->generator = $generator;
     }
 
-    /**
-     * @param $line
-     * @return void
-     */
-    private function createEtagFile($line): void
-    {
-        if (preg_match('/(ETag:)\s"(.*)"/', $line, $matches)) {
-            if (!$handler = fopen('.etag', 'wb')) {
-                throw new RuntimeException('Could not open file ".etag"');
-            }
-            fwrite($handler, $matches[2]);
-            fclose($handler);
-        }
-    }
 
     /**
      * @return Generator
@@ -172,5 +156,21 @@ class CreateJsonFile
         }
         fwrite($handler, json_encode($items[$i], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "]");
         fclose($handler);
+    }
+
+    /**
+     * @return string
+     */
+    public function getEtag(): string
+    {
+        return $this->etag;
+    }
+
+    /**
+     * @return float|int
+     */
+    public function getBlock()
+    {
+        return $this->block;
     }
 }
