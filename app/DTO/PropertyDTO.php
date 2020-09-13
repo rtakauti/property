@@ -23,16 +23,31 @@ class PropertyDTO implements JsonSerializable
         }
     }
 
+    public function getAddress(): AddressDTO
+    {
+        return new AddressDTO($this->attribute['address']);
+    }
+
+    public function getPricingInfos(): PricingInfoDTO
+    {
+        return new PricingInfoDTO($this->attribute['pricingInfos']);
+    }
+
+    public function getImages(int $number)
+    {
+        return array_key_exists($number,$this->attribute['images'])? $this->attribute['images'][$number] : '';
+    }
+
 
     public function __call($name, $arguments)
     {
         $key = (strpos($name, 'get') !== false) ? lcfirst(str_replace('get', '', $name)) : '';
-        $item = array_key_exists($key, $this->attribute) ? $this->attribute[$key] : die('There is no method "' . $name . '"');
-        if ($key === 'createdAt' || $key === 'updatedAt') {
+        $item = array_key_exists($key, $this->attribute) ? $this->attribute[$key] : '';
+        if ('createdAt' === $key || 'updatedAt' === $key) {
             try {
                 return new DateTime($item, new DateTimeZone('America/Sao_Paulo'));
             } catch (Exception $exception) {
-                die($exception->getMessage());
+                echo $exception->getMessage();
             }
         }
         return $item;

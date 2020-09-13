@@ -24,7 +24,7 @@ class Connection
     /**
      * @return Generator
      */
-    public function retrieveJson(): Generator
+    public function getGenerator(): Generator
     {
         if (!$handler = fsockopen($this->domain, $this->port, $errno, $error, 30)) {
             die("$error ($errno)\n");

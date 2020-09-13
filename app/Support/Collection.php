@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Rtakauti\Support;
@@ -21,11 +20,7 @@ abstract class Collection implements ArrayAccess, Countable, Iterator
 
     public function offsetExists($offset): bool
     {
-        if (is_int($offset) || is_string($offset)) {
-            return array_key_exists($offset, $this->items);
-        }
-
-        return false;
+        return (is_int($offset) || is_string($offset)) ? array_key_exists($offset, $this->items) : false;
     }
 
     public function offsetGet($offset)
@@ -62,7 +57,7 @@ abstract class Collection implements ArrayAccess, Countable, Iterator
         ++$this->position;
     }
 
-    public function key():int
+    public function key(): int
     {
         return $this->position;
     }
