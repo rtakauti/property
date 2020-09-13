@@ -23,7 +23,7 @@ $microTest = static function () {
     $connection->setEndpoint('/sources/source-2.json');
     $connection->setPort(80);
     $service = new CreateJsonFile('property.json');
-    $service->setGenerator($connection->retrieveJson());
+    $service->setGenerator($connection->getGenerator());
     $service->create();
     $service = null;
 };
@@ -33,14 +33,18 @@ $microTest1 = static function () {
     try {
         $lines = new LineIterator('property.json');
         foreach ($lines as $line) {
-            $propertyList[] = trim($line, " \n\r,][");
+            $propertyList[] = $line;
         }
     } catch (Exception $exception) {
         die($exception->getMessage());
     }
     foreach ($propertyList as $item) {
-        echo $item->getCreatedAt()->format('d/m/Y') . PHP_EOL;
         echo $item->jsonSerialize() . PHP_EOL;
+        echo $item->getCreatedAt()->format('d/m/Y') . PHP_EOL;
+        echo $item->getAddress()->getGeoLocation()->getLocation()->lon . PHP_EOL;
+        echo $item->getPricingInfos()->getPrice(). PHP_EOL;
+        echo $item->getPricingInfos()->getMonthlyCondoFee(). PHP_EOL;
+        echo $item->getImages(0). PHP_EOL;
     }
     echo count($propertyList) . PHP_EOL;
     $propertyList = null;
