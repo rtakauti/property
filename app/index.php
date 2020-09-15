@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Rtakauti;
 
-ini_set('memory_limit', '12M');
+ini_set('memory_limit', '14M');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -38,13 +38,19 @@ $microTest1 = static function () {
     } catch (Exception $exception) {
         die($exception->getMessage());
     }
-    foreach ($propertyList as $item) {
-        echo $item->jsonSerialize() . PHP_EOL;
+    foreach ($propertyList->paginate(10, 10) as $item) {
+        echo $item->getUsableAreas().PHP_EOL;
+//        echo $item->jsonSerialize() . PHP_EOL;
         echo $item->getCreatedAt()->format('d/m/Y') . PHP_EOL;
-        echo $item->getAddress()->getGeoLocation()->getLocation()->lon . PHP_EOL;
+        echo $item->getAddress()->getGeoLocation()->getLocation()->getLon() . PHP_EOL;
+//        echo $item->getAddress()->getGeoLocation()->jsonSerialize() . PHP_EOL;
+        echo $item->getAddress()->getGeoLocation()->getLocation()->jsonSerialize() . PHP_EOL;
+//        echo $item->getAddress()->jsonSerialize().PHP_EOL;
         echo $item->getPricingInfos()->getPrice(). PHP_EOL;
         echo $item->getPricingInfos()->getMonthlyCondoFee(). PHP_EOL;
-        echo $item->getImages(0). PHP_EOL;
+//        echo $item->getPricingInfos()->jsonSerialize().PHP_EOL;
+        print_r($item->getImages()). PHP_EOL;
+        echo $item->getImage(0). PHP_EOL;
     }
     echo count($propertyList) . PHP_EOL;
     $propertyList = null;

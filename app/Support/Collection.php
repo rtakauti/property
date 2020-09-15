@@ -12,6 +12,7 @@ abstract class Collection implements ArrayAccess, Countable, Iterator
     protected array $items;
     protected int $position;
 
+
     public function __construct(array $items = [])
     {
         $this->position = 0;
