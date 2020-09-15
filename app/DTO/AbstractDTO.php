@@ -38,7 +38,11 @@ abstract class AbstractDTO implements JsonSerializable
     {
         $attribute = $this->cleanGet($name);
         $class = __NAMESPACE__ . '\\' . ucfirst($attribute) . 'DTO';
-        if (empty($result = $this->attribute[$attribute])) {
+        $result = '';
+        if (array_key_exists($attribute, $this->attribute)) {
+            $result = $this->attribute[$attribute];
+        }
+        if (empty($result)) {
             return '';
         }
         if (is_array($result)) {
