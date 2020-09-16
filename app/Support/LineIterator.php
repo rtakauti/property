@@ -6,7 +6,6 @@ namespace Rtakauti\Support;
 
 
 use Iterator;
-use RuntimeException;
 
 class LineIterator implements Iterator
 {
@@ -18,7 +17,7 @@ class LineIterator implements Iterator
     public function __construct($fileName)
     {
         if (!$this->handler = fopen(__DIR__ . '/../assets/' . $fileName, 'rb')) {
-            throw new RuntimeException('Could not open file "' . $fileName . '"' . PHP_EOL);
+            die('Could not open file "' . $fileName . '"' . PHP_EOL);
         }
         $this->validation = true;
     }

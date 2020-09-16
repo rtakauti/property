@@ -41,8 +41,6 @@ class CreateJsonFile
             unlink(__DIR__ . '/../assets/staging.json');
         } catch (RuntimeException $runtimeException) {
             echo $runtimeException->getMessage();
-        } catch (Exception $exception) {
-            die($exception->getMessage());
         }
     }
 
@@ -59,11 +57,7 @@ class CreateJsonFile
             if ("\r\n" === $line) {
                 return;
             }
-            try {
-                $this->createEtagFile($line);
-            } catch (Exception $exception) {
-                die($exception->getMessage());
-            }
+            $this->createEtagFile($line);
         }
         $lines->next();
     }
@@ -76,7 +70,7 @@ class CreateJsonFile
     {
         if (preg_match('/(ETag:)\s"(.*)"/', $line, $matches)) {
             if (!$handler = fopen(__DIR__ . '/../assets/.etag', 'wb')) {
-                throw new RuntimeException('Could not open file ".etag"');
+                die('Could not open file ".etag"');
             }
             fwrite($handler, $matches[2]);
             fclose($handler);
@@ -90,7 +84,7 @@ class CreateJsonFile
     private function createStaging(Generator $lines): void
     {
         if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'wb')) {
-            throw new RuntimeException('Could not open file "staging.json"');
+            die('Could not open file "staging.json"');
         }
         for (; $lines->valid(); $lines->next()) {
             fwrite($handler, trim(str_replace($this->delimiter, $this->newDelimiter, $lines->current()), "\r\n"));
@@ -101,10 +95,10 @@ class CreateJsonFile
     private function createJsonFile(): void
     {
         if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'rb')) {
-            throw new RuntimeException('Could not open file "staging.json"');
+            die('Could not open file "staging.json"');
         }
         if (!$handler1 = fopen(__DIR__ . '/../assets/' . $this->fileName, 'wb')) {
-            throw new RuntimeException('Could not open file "' . $this->fileName . '"');
+            die('Could not open file "' . $this->fileName . '"');
         }
         while (!feof($handler)) {
             if (!is_string($analyse = fgets($handler))) {
