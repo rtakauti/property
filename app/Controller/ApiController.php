@@ -10,7 +10,7 @@ use Rtakauti\Support\PropertyList;
 class ApiController
 {
 
-    public function property(): void
+    public function getAll(): void
     {
         header('Content-Type: application/json; charset=utf-8');
         echo '[';
