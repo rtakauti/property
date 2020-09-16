@@ -40,7 +40,7 @@ class CreateJsonFile
             $this->createJsonFile();
             unlink(__DIR__ . '/../assets/staging.json');
         } catch (RuntimeException $runtimeException) {
-            echo $runtimeException->getMessage();
+            return;
         }
     }
 
@@ -69,9 +69,7 @@ class CreateJsonFile
     private function createEtagFile($line): void
     {
         if (preg_match('/(ETag:)\s"(.*)"/', $line, $matches)) {
-            if (!$handler = fopen(__DIR__ . '/../assets/.etag', 'wb')) {
-                die('Could not open file ".etag"');
-            }
+            $handler = fopen(__DIR__ . '/../assets/.etag', 'wb');
             fwrite($handler, $matches[2]);
             fclose($handler);
         }
@@ -83,9 +81,7 @@ class CreateJsonFile
      */
     private function createStaging(Generator $lines): void
     {
-        if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'wb')) {
-            die('Could not open file "staging.json"');
-        }
+        $handler = fopen(__DIR__ . '/../assets/staging.json', 'wb');
         for (; $lines->valid(); $lines->next()) {
             fwrite($handler, trim(str_replace($this->delimiter, $this->newDelimiter, $lines->current()), "\r\n"));
         }
@@ -94,12 +90,8 @@ class CreateJsonFile
 
     private function createJsonFile(): void
     {
-        if (!$handler = fopen(__DIR__ . '/../assets/staging.json', 'rb')) {
-            die('Could not open file "staging.json"');
-        }
-        if (!$handler1 = fopen(__DIR__ . '/../assets/' . $this->fileName, 'wb')) {
-            die('Could not open file "' . $this->fileName . '"');
-        }
+        $handler = fopen(__DIR__ . '/../assets/staging.json', 'rb');
+        $handler1 = fopen(__DIR__ . '/../assets/' . $this->fileName, 'wb');
         while (!feof($handler)) {
             if (!is_string($analyse = fgets($handler))) {
                 continue;

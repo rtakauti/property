@@ -21,6 +21,7 @@ class Route
         if ($this->verb !== strtoupper($name) || strpos($this->route, $arguments[0]) !== 0) {
             return;
         }
-        (new $arguments[1])->{$arguments[2]}(str_replace($arguments[0], '', $this->route));
+        $param = trim(str_replace($arguments[0], '', $this->route), '/');
+        (new $arguments[1])->{$arguments[2]}($param);
     }
 }
