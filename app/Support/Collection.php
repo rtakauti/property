@@ -6,8 +6,9 @@ namespace Rtakauti\Support;
 use ArrayAccess;
 use Countable;
 use Iterator;
+use JsonSerializable;
 
-abstract class Collection implements ArrayAccess, Countable, Iterator
+abstract class Collection implements ArrayAccess, Countable, Iterator, JsonSerializable
 {
     protected array $items;
     protected int $position;

@@ -22,7 +22,7 @@ abstract class AbstractDTO implements JsonSerializable
     public function jsonSerialize()
     {
         try {
-            return json_encode($this->attribute, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            return json_encode($this->attribute, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         } catch (Exception $exception) {
             die($exception->getMessage());
         }
@@ -37,15 +37,11 @@ abstract class AbstractDTO implements JsonSerializable
     public function __call($name, $arguments)
     {
         $attribute = $this->cleanGet($name);
-        $class = __NAMESPACE__ . '\\' . ucfirst($attribute) . 'DTO';
-        $result = '';
-        if (array_key_exists($attribute, $this->attribute)) {
-            $result = $this->attribute[$attribute];
-        }
-        if (empty($result)) {
+        if (empty($result = $this->attribute[$attribute] ?? '')) {
             return '';
         }
         if (is_array($result)) {
+            $class = __NAMESPACE__ . '\\' . ucfirst($attribute) . 'DTO';
             return new $class($result);
         }
         if (is_numeric($result)) {
@@ -55,7 +51,7 @@ abstract class AbstractDTO implements JsonSerializable
             if (!is_bool($date = new DateTime($result, new DateTimeZone('America/Sao_Paulo')))) {
                 return $date;
             }
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
         }
         return $result;
     }

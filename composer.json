@@ -11,7 +11,10 @@
     "psr-4": {
       "Rtakauti\\": "app/",
       "Test\\": "tests/"
-    }
+    },
+    "files": [
+      "app/Core/route.php"
+    ]
   },
   "require": {
     "ext-json": "*"
